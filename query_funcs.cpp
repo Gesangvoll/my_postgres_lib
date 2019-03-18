@@ -101,10 +101,63 @@ void query1(connection *C, int use_mpg, int min_mpg, int max_mpg, int use_ppg,
   ntxn.commit();
 }
 
-void query2(connection *C, string team_color) {}
+void query2(connection *C, string team_color) {
+  string query_statement =
+      "SELECT TEAM.NAME FROM COLOR, TEAM WHERE COLOR.NAME = '" + team_color +
+      "' AND COLOR.COLOR_ID = TEAM.COLOR_ID;";
+  nontransaction ntxn(*C);
+  result r = ntxn.exec(query_statement);
+  cout << "Name" << endl;
+  for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
+    cout << c[0].as<string>() << " " << endl;
+  }
+  ntxn.commit();
+}
 
-void query3(connection *C, string team_name) {}
+void query3(connection *C, string team_name) {
+  string query_statement = "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME "
+                           "FROM PLAYER, TEAM WHERE TEAM.NAME = '" +
+                           team_name +
+                           "' AND PLAYER.TEAM_ID = TEAM.TEAM_ID "
+                           "ORDER BY PPG DESC;";
+  nontransaction ntxn(*C);
+  result r = ntxn.exec(query_statement);
+  cout << "FIRST_NAME LAST_NAME" << endl;
+  for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
+    cout << c[0].as<string>() << " " << c[1].as<string>() << endl;
+  }
+  ntxn.commit();
+}
 
-void query4(connection *C, string team_state, string team_color) {}
+void query4(connection *C, string team_state, string team_color) {
+  string query_statement =
+      "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME, "
+      "PLAYER.UNIFORM_NAME FROM PLAYER, TEAM, STATE, "
+      "COLOR WHERE STATE.NAME = '" +
+      team_state + "' AND COLOR.NAME = '" + team_color +
+      "' AND PLAYER.TEAM_ID = TEAM.TEAM_ID AND TEAM.STATE_ID = STATE.STATE_ID "
+      "AND TEAM.COLOR_ID = COLOR.COLOR_ID;";
+  nontransaction ntxn(*C);
+  result r = ntxn.exec(query_statement);
+  cout << "FIRST_NAME LAST_NAME UNIFORM_NUM" << endl;
+  for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
+    cout << c[0].as<string>() << " " << c[1].as<string>() << " "
+         << c[2].as<string>() << endl;
+  }
+  ntxn.commit();
+}
 
-void query5(connection *C, int num_wins) {}
+void query5(connection *C, int num_wins) {
+  string query_statement = "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME, "
+                           "TEAM.NAME, TEAM.WINS WHERE TEAM.WINS > " +
+                           to_string(num_wins) +
+                           " AND PLAYER.TEAM_ID = TEAM.TEAM_ID;";
+  nontransaction ntxn(*C);
+  result r = ntxn.exec(query_statement);
+  cout << "FIRST_NAME LAST_NAME TEAM_NAME WINS" << endl;
+  for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
+    cout << c[0].as<string>() << " " << c[1].as<string>() << " "
+         << c[2].as<string>() << " " << c[3].as<int>() << endl;
+  }
+  ntxn.commit();
+}
