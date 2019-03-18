@@ -6,13 +6,13 @@
 using namespace std;
 using namespace pqxx;
 
-string &deal_with_single_quote(string &token) {
-  int pos = token.find("'");
-  if (pos != string::npos) {
-    token.insert(pos, "'");
-  }
-  return token;
-}
+// string &deal_with_single_quote(string &token) {
+//   int pos = token.find("'");
+//   if (pos != string::npos) {
+//     token.insert(pos, "'");
+//   }
+//   return token;
+//}
 
 void read_data(string filename, work *txn) {
   string table_name = filename.substr(0, filename.find('.'));

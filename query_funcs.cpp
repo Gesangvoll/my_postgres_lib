@@ -14,11 +14,12 @@ void add_player(connection *C, int team_id, int jersey_num, string first_name,
                 string last_name, int mpg, int ppg, int rpg, int apg,
                 double spg, double bpg) {
   string add_player_statement =
-      "INSERT INTO PLAYER VALUES ( DEFAULT, " + to_string(team_id) + ", " +
-      to_string(jersey_num) + ", " + deal_with_single_quote(first_name) + ", " +
-      deal_with_single_quote(last_name) + ", " + to_string(mpg) + ", " +
-      to_string(ppg) + ", " + to_string(rpg) + ", " + to_string(apg) + ", " +
-      to_string(spg) + ", " + to_string(bpg) + ");";
+      "INSERT INTO PLAYER VALUES ( DEFAULT, '" + to_string(team_id) + "', '" +
+      to_string(jersey_num) + "', '" + deal_with_single_quote(first_name) +
+      "', '" + deal_with_single_quote(last_name) + "', '" + to_string(mpg) +
+      "', '" + to_string(ppg) + "', '" + to_string(rpg) + "', '" +
+      to_string(apg) + "', '" + to_string(spg) + "', '" + to_string(bpg) +
+      "');";
   work txn(*C);
   txn.exec(add_player_statement);
   txn.commit();
@@ -27,25 +28,25 @@ void add_player(connection *C, int team_id, int jersey_num, string first_name,
 void add_team(connection *C, string name, int state_id, int color_id, int wins,
               int losses) {
   string add_team_statement =
-      "INSERT INTO TEAM VALUES ( DEFAULT, " + deal_with_single_quote(name) +
-      ", " + to_string(state_id) + ", " + to_string(color_id) + ", " +
-      to_string(wins) + ", " + to_string(losses) + ");";
+      "INSERT INTO TEAM VALUES ( DEFAULT, '" + deal_with_single_quote(name) +
+      "', '" + to_string(state_id) + "', '" + to_string(color_id) + "', '" +
+      to_string(wins) + "', '" + to_string(losses) + "');";
   work txn(*C);
   txn.exec(add_team_statement);
   txn.commit();
 }
 
 void add_state(connection *C, string name) {
-  string add_state_statement = "INSERT INTO STATE VALUES ( DEFAULT, " +
-                               deal_with_single_quote(name) + ");";
+  string add_state_statement = "INSERT INTO STATE VALUES ( DEFAULT, '" +
+                               deal_with_single_quote(name) + "');";
   work txn(*C);
   txn.exec(add_state_statement);
   txn.commit();
 }
 
 void add_color(connection *C, string name) {
-  string add_color_statement = "INSERT INTO COLOR VALUES ( DEFAULT, " +
-                               deal_with_single_quote(name) + ");";
+  string add_color_statement = "INSERT INTO COLOR VALUES ( DEFAULT, '" +
+                               deal_with_single_quote(name) + "');";
   work txn(*C);
   txn.exec(add_color_statement);
   txn.commit();
@@ -132,7 +133,7 @@ void query3(connection *C, string team_name) {
 void query4(connection *C, string team_state, string team_color) {
   string query_statement =
       "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME, "
-      "PLAYER.UNIFORM_NAME FROM PLAYER, TEAM, STATE, "
+      "PLAYER.UNIFORM_NUM FROM PLAYER, TEAM, STATE, "
       "COLOR WHERE STATE.NAME = '" +
       team_state + "' AND COLOR.NAME = '" + team_color +
       "' AND PLAYER.TEAM_ID = TEAM.TEAM_ID AND TEAM.STATE_ID = STATE.STATE_ID "
@@ -148,10 +149,10 @@ void query4(connection *C, string team_state, string team_color) {
 }
 
 void query5(connection *C, int num_wins) {
-  string query_statement = "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME, "
-                           "TEAM.NAME, TEAM.WINS WHERE TEAM.WINS > " +
-                           to_string(num_wins) +
-                           " AND PLAYER.TEAM_ID = TEAM.TEAM_ID;";
+  string query_statement =
+      "SELECT PLAYER.FIRST_NAME, PLAYER.LAST_NAME, "
+      "TEAM.NAME, TEAM.WINS FROM PLAYER, TEAM WHERE TEAM.WINS > " +
+      to_string(num_wins) + " AND PLAYER.TEAM_ID = TEAM.TEAM_ID;";
   nontransaction ntxn(*C);
   result r = ntxn.exec(query_statement);
   cout << "FIRST_NAME LAST_NAME TEAM_NAME WINS" << endl;
