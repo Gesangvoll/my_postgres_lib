@@ -1,11 +1,65 @@
 #include "exerciser.h"
+#include <fstream>
 #include <iostream>
 #include <pqxx/pqxx>
 #include <string>
-
 using namespace std;
 using namespace pqxx;
-void read_data(string filename, work *txn) {}
+
+string &deal_with_single_quote(string &token) {
+  int pos = token.find("'");
+  if (pos != string::npos) {
+    token.insert(pos, "'");
+  }
+  return token;
+}
+
+void read_data(string filename, work *txn) {
+  string table_name = filename.substr(0, filename.find('.'));
+  ifstream ifs;
+  ifs.exceptions(ifstream::badbit);
+  try {
+    ifs.open(filename);
+  } catch (const ifstream::failure &e) {
+    cerr << "Can not parse file: " << filename << e.what() << endl;
+    exit(EXIT_FAILURE);
+  }
+  string line;
+  while (getline(ifs, line)) {
+    line.append(" ");
+    int pos = line.find(" ");
+    string token;
+    vector<string> tokens;
+    while (pos != string::npos) {
+      token = line.substr(0, pos);
+      tokens.push_back(token);
+      line = line.substr(pos + 1, string::npos);
+      pos = line.find(" ");
+    }
+    // Update the table
+    string insert_statement;
+    insert_statement = "INSERT INTO " + table_name + " VALUES ( DEFAULT, ";
+    for (int i = 1; i < tokens.size() - 1; i++) {
+      if (isalpha((int)tokens[i][0])) {
+        deal_with_single_quote(tokens[i]);
+        insert_statement.append("'").append(tokens[i]).append("'").append(", ");
+      } else {
+        insert_statement.append(tokens[i]).append(", ");
+      }
+    }
+    if (isalpha((int)tokens[tokens.size() - 1][0])) {
+      insert_statement.append("'")
+          .append(tokens[tokens.size() - 1])
+          .append("'")
+          .append(");");
+    } else {
+      insert_statement.append(tokens[tokens.size() - 1]).append(");");
+    }
+    cout << insert_statement << endl;
+    txn->exec(insert_statement);
+  }
+  ifs.close();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -17,7 +71,7 @@ int main(int argc, char *argv[]) {
   try {
     // Establish a connection to the database
     // Parameters: database name, user name, user password
-    C = new connection("dbname=ACC_BBALL user=postgres password=passw0rd");
+    C = new connection("dbname=acc_bball user=postgres password=passw0rd");
     if (C->is_open()) {
       cout << "Opened database successfully: " << C->dbname() << endl;
     } else {
@@ -69,22 +123,12 @@ int main(int argc, char *argv[]) {
                             "COLOR_ID SERIAL PRIMARY KEY NOT NULL,"
                             "NAME VARCHAR (50));");
   vector<string> create_tables;
-  for (int i = 0; i < 4; i++) {
-    switch (i) {
-    case 0:
-      create_tables.push_back(create_player_table);
-      break;
-    case 1:
-      create_tables.push_back(create_team_table);
-      break;
-    case 2:
-      create_tables.push_back(create_state_table);
-      break;
-    case 3:
-      create_tables.push_back(create_color_table);
-      break;
-    }
-  }
+
+  create_tables.push_back(create_player_table);
+  create_tables.push_back(create_team_table);
+  create_tables.push_back(create_state_table);
+  create_tables.push_back(create_color_table);
+
   for (int i = 0; i < 4; i++) {
     try {
       work *txn = new work(*C);
@@ -96,11 +140,8 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   }
-  // txn->exec(create_player_table);
-  // txn->exec(create_team_table);
-  // txn->exec(create_state_table);
-  // txn->exec(create_color_table);
-  //      load each table with rows from the provided source txt files
+
+  // Load each table with rows from the provided source txt files
   string files[] = {"player.txt", "team.txt", "state.txt", "color.txt"};
   for (int i = 0; i < 4; i++) {
     try {
@@ -117,6 +158,5 @@ int main(int argc, char *argv[]) {
 
   // Close database connection
   C->disconnect();
-
   return 0;
 }

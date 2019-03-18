@@ -101,7 +101,9 @@ void query1(connection *C, int use_mpg, int min_mpg, int max_mpg, int use_ppg,
   ntxn.commit();
 }
 
-void query2(connection *C, string team_color) {}
+void query2(connection *C, string team_color) {
+  
+}
 
 void query3(connection *C, string team_name) {}
 
