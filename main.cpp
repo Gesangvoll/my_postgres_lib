@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   try {
     // Establish a connection to the database
     // Parameters: database name, user name, user password
-    C = new connection("dbname=acc_bball user=postgres password=passw0rd");
+    C = new connection("dbname=ACC_BBALL user=postgres password=passw0rd");
     if (C->is_open()) {
       cout << "Opened database successfully: " << C->dbname() << endl;
     } else {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   // database
   string create_player_table("CREATE TABLE PLAYER("
                              "PLAYER_ID SERIAL PRIMARY KEY NOT NULL,"
-                             "TEAM_ID INT,"
+                             "TEAM_ID INT REFERENCES team(team_id),"
                              "UNIFORM_NUM INT,"
                              "FIRST_NAME VARCHAR (50),"
                              "LAST_NAME VARCHAR (50),"
@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
   string create_team_table("CREATE TABLE TEAM("
                            "TEAM_ID SERIAL PRIMARY KEY NOT NULL,"
                            "NAME VARCHAR (50),"
-                           "STATE_ID INT,"
-                           "COLOR_ID INT,"
+                           "STATE_ID INT REFERENCES state(state_id),"
+                           "COLOR_ID INT REFERENCES color(color_id),"
                            "WINS INT,"
                            "LOSSES INT);");
   string create_state_table("CREATE TABLE STATE("
@@ -123,11 +123,10 @@ int main(int argc, char *argv[]) {
                             "COLOR_ID SERIAL PRIMARY KEY NOT NULL,"
                             "NAME VARCHAR (50));");
   vector<string> create_tables;
-
-  create_tables.push_back(create_player_table);
-  create_tables.push_back(create_team_table);
-  create_tables.push_back(create_state_table);
   create_tables.push_back(create_color_table);
+  create_tables.push_back(create_state_table);
+  create_tables.push_back(create_team_table);
+  create_tables.push_back(create_player_table);
 
   for (int i = 0; i < 4; i++) {
     try {
@@ -142,7 +141,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Load each table with rows from the provided source txt files
-  string files[] = {"player.txt", "team.txt", "state.txt", "color.txt"};
+  string files[] = {"color.txt", "state.txt", "team.txt", "player.txt"};
   for (int i = 0; i < 4; i++) {
     try {
       txn = new work(*C);

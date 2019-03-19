@@ -4,8 +4,9 @@ using namespace std;
 
 string &deal_with_single_quote(string &token) {
   int pos = token.find("'");
-  if (pos != string::npos) {
+  while (pos != string::npos) {
     token.insert(pos, "'");
+    pos = token.find("'", pos + 2);
   }
   return token;
 }
@@ -87,6 +88,7 @@ void query1(connection *C, int use_mpg, int min_mpg, int max_mpg, int use_ppg,
   } else {
     query_statement += ";";
   }
+  cout << "query1: " << query_statement << endl;
   nontransaction ntxn(*C);
   result r = ntxn.exec(query_statement);
   cout << "PLAYER_ID TEAM_ID UNIFORM_NUM FIRST_NAME LAST_NAME MPG PPG RPG APG "
