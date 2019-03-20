@@ -88,7 +88,7 @@ void query1(connection *C, int use_mpg, int min_mpg, int max_mpg, int use_ppg,
   } else {
     query_statement += ";";
   }
-  cout << "query1: " << query_statement << endl;
+  // cout << "query1: " << query_statement << endl;
   nontransaction ntxn(*C);
   result r = ntxn.exec(query_statement);
   cout << "PLAYER_ID TEAM_ID UNIFORM_NUM FIRST_NAME LAST_NAME MPG PPG RPG APG "
@@ -110,7 +110,7 @@ void query2(connection *C, string team_color) {
       "' AND COLOR.COLOR_ID = TEAM.COLOR_ID;";
   nontransaction ntxn(*C);
   result r = ntxn.exec(query_statement);
-  cout << "Name" << endl;
+  cout << "NAME" << endl;
   for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
     cout << c[0].as<string>() << " " << endl;
   }
@@ -157,7 +157,7 @@ void query5(connection *C, int num_wins) {
       to_string(num_wins) + " AND PLAYER.TEAM_ID = TEAM.TEAM_ID;";
   nontransaction ntxn(*C);
   result r = ntxn.exec(query_statement);
-  cout << "FIRST_NAME LAST_NAME TEAM_NAME WINS" << endl;
+  cout << "FIRST_NAME LAST_NAME NAME WINS" << endl;
   for (result::const_iterator c = r.begin(); c != r.end(); ++c) {
     cout << c[0].as<string>() << " " << c[1].as<string>() << " "
          << c[2].as<string>() << " " << c[3].as<int>() << endl;
